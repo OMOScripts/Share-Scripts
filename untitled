@@ -1,6 +1,15 @@
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
+getgenv().BondFarmSetting = {
+    tweenDuration = 18, -- The lower it goes, the faster you teleport, Best is 15-18.
+    AutoExecute = true,
+    CheckMissedBonds = true,
+    WebhookUrl = "URL_HERE",
+    autoSHOPDelay = 70 -- How long it will wait to make you server hop, avoid stuck.
+}
+EnabledScript = true
+SaveNewSettings = true
 
 if EnabledScript ~= true then return end
 if getgenv().AlreadyExecutedBondFarm and getgenv().AlreadyExecutedBondFarm == true then print("Script already ran, stopped script") return end

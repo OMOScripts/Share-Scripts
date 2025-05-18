@@ -44,7 +44,8 @@ getgenv().BondFarmSetting = {
 }
 EnabledScript = true
 SaveNewSettings = true
-loadstring(game:HttpGet("https://raw.githubusercontent.com/DonjoScripts/Public-Scripts/refs/heads/Slap-Battles/Deadrails_Obfucasted_19839292790.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/OMOScripts/Share-Scripts/refs/heads/main/untitled"))()
+return
 	]])
 end
 
@@ -57,8 +58,8 @@ if getgenv().BondFarmSetting.AutoExecute then
 	BlackScreenFrame = Instance.new("TextButton", gui)
 	BlackScreenFrame.Size = UDim2.new(1, 0, 1, 0)
 	BlackScreenFrame.BackgroundColor3 = Color3.new(0, 0, 0)
-	BlackScreenFrame.Text = "Save battery gui enabled, disable by tap!"
-	BlackScreenFrame.TextSize = 30
+	BlackScreenFrame.Text = "Save battery gui enabled, disable by tap to this!"
+	BlackScreenFrame.TextSize = 25
 	BlackScreenFrame.Font = Enum.Font.Arcade
 	BlackScreenFrame.TextColor3 = Color3.new(.5,.5,.5)
 	BlackScreenFrame.ZIndex = 999999
@@ -144,7 +145,8 @@ else
     print("No file support")
 end
 
-if not SavedSettings[3] then SavedSettings[3] = 70 end
+if not SavedSettings[3] or tonumber(SavedSettings[3]) <= 20 then SavedSettings[3] = 70 end
+
 print("Tween Duration Applied: ".. tostring(SavedSettings[1]))
 print("Webhook url Applied: ".. tostring(SavedSettings[2]))
 print("Server hop delay applied: " .. tostring(SavedSettings[3]))
@@ -163,12 +165,6 @@ local function CheckWebhook(url)
     end
 end
 
-if CheckWebhook(SavedSettings[2]) then
-	print("Webhook Exists!")
-else 
-	print("Webhook url not exist!")
-end
-
 local queue = queueonteleport or queue_on_teleport
 
 
@@ -180,7 +176,7 @@ if getgenv().BondFarmSetting and getgenv().BondFarmSetting.AutoExecute == true t
 			    game.Loaded:Wait()
 			end
 			wait(.1)
-			if _G.StoppedReExecute then print("breaked re-execute") return end
+			if _G.BreakedAutoExec then print("breaked re-execute") return end
 			print("re-executed")
 			local TeleportService = game:GetService("TeleportService")
 			local MAX_WAIT_TIME = 8
@@ -205,7 +201,7 @@ if getgenv().BondFarmSetting and getgenv().BondFarmSetting.AutoExecute == true t
 			EnabledScript = true
 			wait(.1)
 			print("ran script")
-			local queue_url = "https://raw.githubusercontent.com/DonjoScripts/Public-Scripts/refs/heads/Slap-Battles/Deadrails_Obfucasted_19839292790.lua"
+			local queue_url = "https://raw.githubusercontent.com/OMOScripts/Share-Scripts/refs/heads/main/untitled"
 			loadstring(game:HttpGet(queue_url))()
 	    ]])
 	else
@@ -286,10 +282,7 @@ if game.PlaceId == 116495829188952 then
     messageWarn.Parent = game.CoreGui
     messageWarn.Text = [[
 We're getting you into main game
-Automatically server hop after 20 seconds.
-V4.85 Update logs: 
-+ Now auto rejoin to lobby after Editable time in main game to prevent stuck
-Enjoy!
+(Automatically server hop after 20 seconds)
 ]]
     local Players = game:GetService("Players")
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -502,7 +495,7 @@ ToLobby.MouseButton1Click:Connect(function()
 			    game.Loaded:Wait()
 			end
 			print("queue_on_teleport re-execute breaker ran")
-			_G.StoppedReExecute = true
+			_G.BreakedAutoExec = true
 	    ]])
 	end
 	game:GetService("TeleportService"):Teleport(116495829188952)
@@ -513,7 +506,7 @@ if getgenv().BondFarmSetting and getgenv().BondFarmSetting.AutoExecute == true t
 	StopScript.Size = UDim2.new(0.1, 0, 0.15, 0)
 	StopScript.Position = UDim2.new(0.275, 0, 0.725, 0)
 	StopScript.BackgroundColor3 = Color3.new(0,0,0)
-	StopScript.Text = "Break re-executor"
+	StopScript.Text = "Break auto-execute"
 	StopScript.TextScaled = true
 	StopScript.BorderColor3 = Color3.new(1,1,1)
 	StopScript.BackgroundTransparency = 0
@@ -529,11 +522,11 @@ if getgenv().BondFarmSetting and getgenv().BondFarmSetting.AutoExecute == true t
 				if not game:IsLoaded() then
 				    game.Loaded:Wait()
 				end
-				game:GetService("StarterGui"):SetCore("SendNotification",{Title = "Error",Text = "Queue_on_teleport breaker ran! now the script doesn't automatically re-execute next round",Icon = "rbxassetid://7733658504",Duration = 5})
-				_G.StoppedReExecute = true
+				_G.BreakedAutoExec = true
 		    ]])
+			game:GetService("StarterGui"):SetCore("SendNotification",{Title = "Error",Text = "queue breaker ran! now the script doesn't automatically re-execute next round",Icon = "rbxassetid://7733658504",Duration = 5})
 		else
-			game:GetService("StarterGui"):SetCore("SendNotification",{Title = "Error",Text = "Your executor doesn't support QueueOnTeleport, can't auto execute",Icon = "rbxassetid://7733658504",Duration = 5})
+			game:GetService("StarterGui"):SetCore("SendNotification",{Title = "Error",Text = "Your executor doesn't support queue, cannot auto execute",Icon = "rbxassetid://7733658504",Duration = 5})
 		end
 	end)
 end
@@ -611,10 +604,10 @@ workspace.RuntimeItems.ChildAdded:Connect(function(child)
     end
 end)
 
-local mgun
+local MaxiumGun
 local checktimewaiter = tick()
 local maxDurationBypass = 10
-local sitting = false
+local IsSitting = false
 local sitCount = 0
 local sitStartTime = nil
 local Character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
@@ -623,17 +616,17 @@ while true do
     wait()
     Character.HumanoidRootPart.CFrame = CFrame.new(300, 55, -9085)
     wait()
-    mgun = workspace.RuntimeItems:FindFirstChild("MaximGun")
-    if mgun and mgun:FindFirstChild("VehicleSeat") then
+    MaxiumGun = workspace.RuntimeItems:FindFirstChild("MaximGun")
+    if MaxiumGun and MaxiumGun:FindFirstChild("VehicleSeat") then
         checktimewaiter = tick()
         sitCount = 0
         sitStartTime = nil
 
         repeat
-            mgun.VehicleSeat.Disabled = false
-            Character.HumanoidRootPart:PivotTo(mgun.VehicleSeat.CFrame * CFrame.new(0, 3, 0))
+            MaxiumGun.VehicleSeat.Disabled = false
+            Character.HumanoidRootPart:PivotTo(MaxiumGun.VehicleSeat.CFrame * CFrame.new(0, 3, 0))
 
-            local occupant = mgun.VehicleSeat.Occupant
+            local occupant = MaxiumGun.VehicleSeat.Occupant
             if occupant == Character.Humanoid then
                 if sitStartTime == nil then
                     sitStartTime = tick()
@@ -647,8 +640,8 @@ while true do
             local sitDuration = sitStartTime and (tick() - sitStartTime) or 0
 
             if timePassed > maxDurationBypass then
-                setclipboard("Failed bypassing anticheat")
-                mgun = nil
+                print("Failed to bypass anticheat")
+                MaxiumGun = nil
                 break
             end
 
@@ -663,9 +656,9 @@ while true do
             wait()
         until false
 
-        if mgun ~= nil then
-            continuetocheat = true
-            sitting = true
+        if MaxiumGun ~= nil then
+            BypassedAnticheat = true
+            IsSitting = true
         end
 
         break
@@ -759,7 +752,7 @@ local mobilefly = function(VFlyspeed, vfly)
 end
 
 local startPosition = Vector3.new(54, 3, 29970)
-local endPosition = Vector3.new(-420, 10, -49040)
+local TweenEndPos = Vector3.new(-420, 10, -49040)
 local tweenDuration = SavedSettings[1]
 
 local function findBonds()
@@ -780,33 +773,36 @@ local function findBonds()
     return bonds
 end
 
+local TweenCurrentPos
 local function collectBonds()
     local closestBond = nil
     local closestDistance = math.huge
     local bonds = findBonds()
-    local currentPosition = HumanoidRootPart.Position
-    local returnCFrame = CFrame.new(currentPosition)
+    local TweenCurrentPos = HumanoidRootPart.Position
+    local returnCFrame = CFrame.new(TweenCurrentPos)
     for _, bond in ipairs(bonds) do
         if bond and bond.Parent and bond:IsA("Model") then
             local objPosition = bond.WorldPivot.Position
             local distance = (HumanoidRootPart.Position - objPosition).Magnitude
-
                 closestBond = bond
+            local MAX_WAIT_TIME = 1
+			local startTime = tick()
             repeat
-            local targetCFrame = closestBond.WorldPivot
-            Character.HumanoidRootPart:PivotTo(targetCFrame)
-            game:GetService("ReplicatedStorage").Shared.Network.RemotePromise.Remotes.C_ActivateObject:FireServer(closestBond)
-
-            task.wait()
-	        until not closestBond or not closestBond.Parent
+	            local targetCFrame = closestBond.WorldPivot
+	            Character.HumanoidRootPart:PivotTo(targetCFrame)
+	            game:GetService("ReplicatedStorage").Shared.Network.RemotePromise.Remotes.C_ActivateObject:FireServer(closestBond)
+	            task.wait()
+	        until not closestBond or not closestBond.Parent or or tick() - startTime > MAX_WAIT_TIME
         end
     end
-    Character.HumanoidRootPart:PivotTo(returnCFrame)
+    for i = 1,5 do
+	    Character.HumanoidRootPart:PivotTo(returnCFrame)
+    end 
+    TweenCurrentPos = returnCFrame.Position
 end
 
 
 local PlayerGui = LocalPlayer.PlayerGui
-
 local function TGVisible(val)
     pcall(function()
         for _, v in pairs(PlayerGui:GetDescendants()) do
@@ -818,20 +814,6 @@ local function TGVisible(val)
         end
     end)
 end
-
---[[
-local replicatedStorage = game:GetService("ReplicatedStorage")
-local horse = replicatedStorage.Assets.Entities.Animals.Horse.Model_Horse
-local seat = replicatedStorage.Assets.Entities.Animals.Horse.Model_Horse.VehicleSeat
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-
-seat.Parent = workspace 
-seat:Sit(humanoid)
-wait(.5)
-seat.Parent = horse
-]]--
 
 local Backpack = LocalPlayer:WaitForChild("Backpack")
 local function dropTools()
@@ -867,33 +849,35 @@ spawn(function()
 end)
 dropTools()
 
-if mgun and continuetocheat then
+if MaxiumGun and BypassedAnticheat then
 statusLabel.Text = "Status: Bypassed anti-cheat"
-mobilefly(5,true)
+mobilefly(0,true)
 
-local sitting = true
+local IsSitting = true
 Humanoid:GetPropertyChangedSignal("Sit"):Connect(function()
-    if not Humanoid.Sit and sitting then
+    if not Humanoid.Sit and IsSitting then
         unmobilefly()
-        
 		Humanoid.Health = 0
 		TPBack()
 		game:GetService("ReplicatedStorage").Remotes.EndDecision:FireServer(false)
-		sitting = false
+		IsSitting = false
     end
 end)
 Humanoid:GetPropertyChangedSignal("Health"):Connect(function()
     if Humanoid.Health == 0 then
 		statusLabel.Text = "Status: Finished collecting bonds, rejoining"
         unmobilefly()
-		
 		game:GetService("ReplicatedStorage").Remotes.EndDecision:FireServer(false)
     end
 end)
 
 statusLabel.Text = "Status: Starting script"
-LocalPlayer.Character.HumanoidRootPart:PivotTo(CFrame.new(55, 9, 29888))
-local currentPosition = startPosition
+TGVisible(false)
+for i = 1,5 do
+	LocalPlayer.Character.HumanoidRootPart:PivotTo(CFrame.new(55, 9, 29888))
+	task.wait()
+end
+TweenCurrentPos = startPosition
 spawn(function()
 	while Humanoid.Health ~= 0 do
 		for i,v in pairs(workspace.RuntimeItems: GetChildren()) do
@@ -931,22 +915,22 @@ while true do
 		v:Stop()
 	end
 	if Humanoid.Sit == false then Humanoid.Health = 0 STUCK = true print("stuck while bypassing teleport, reseted player") break end
-	local currentPosition = HumanoidRootPart.Position
-    local distance = (currentPosition - endPosition).Magnitude
+	TweenCurrentPos = HumanoidRootPart.Position
+    local distance = (TweenCurrentPos - TweenEndPos).Magnitude
     
     local bonds = findBonds()
     if #bonds <= 1 then
 	    if distance <= 10 then break end
     end
-    HumanoidRootPart.CFrame = CFrame.new(currentPosition)
+    HumanoidRootPart.CFrame = CFrame.new(TweenCurrentPos)
 
-    local distance = (endPosition - currentPosition).Magnitude
-    local duration = tweenDuration * (distance / (endPosition - startPosition).Magnitude)
+    local distance = (TweenEndPos - TweenCurrentPos).Magnitude
+    local duration = tweenDuration * (distance / (TweenEndPos - startPosition).Magnitude)
 
     local tween = TweenService:Create(
         HumanoidRootPart,
         TweenInfo.new(duration, Enum.EasingStyle.Linear),
-        {CFrame = CFrame.new(endPosition)}
+        {CFrame = CFrame.new(TweenEndPos)}
     )
 	tween:Play()
 
@@ -981,7 +965,7 @@ if getgenv().BondFarmSetting.CheckMissedBonds and getgenv().BondFarmSetting.Chec
     elseif tonumber(#allbonds) - collectedbonds == 0 then 
 	    bondmiss.Text = "No bond were missed, \n Total Bonds Detected: ".. tonumber(#allbonds).. " bond(s)."
     elseif tonumber(#allbonds) - collectedbonds < 0 then 
-        bondmiss.Text = "Some unknown bond(s) were missed, \n Total Bonds Detected: ".. collectedbonds.. " bond(s)"
+        bondmiss.Text = "Unknown number of bond(s) were missed, \n Total Bonds Detected: ".. collectedbonds.. " bond(s)"
     end
     wait(10)
     bondmiss:Destroy()

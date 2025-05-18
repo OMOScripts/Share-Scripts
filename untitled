@@ -773,6 +773,7 @@ local function findBonds()
     return bonds
 end
 
+local FailedCollectedBonds = 0
 local TweenCurrentPos
 local function collectBonds()
     local closestBond = nil
@@ -781,7 +782,7 @@ local function collectBonds()
     local TweenCurrentPos = HumanoidRootPart.Position
     local returnCFrame = CFrame.new(TweenCurrentPos)
     for _, bond in ipairs(bonds) do
-        if bond and bond.Parent and bond:IsA("Model") then
+        if bond and bond.Parent and bond:IsA("Model") and bond.Name == "Bond" then
             local objPosition = bond.WorldPivot.Position
             local distance = (HumanoidRootPart.Position - objPosition).Magnitude
                 closestBond = bond
@@ -792,7 +793,8 @@ local function collectBonds()
 	            Character.HumanoidRootPart:PivotTo(targetCFrame)
 	            game:GetService("ReplicatedStorage").Shared.Network.RemotePromise.Remotes.C_ActivateObject:FireServer(closestBond)
 	            task.wait()
-	        until not closestBond or not closestBond.Parent or or tick() - startTime > MAX_WAIT_TIME
+	        until not closestBond or not closestBond.Parent or tick() - startTime > MAX_WAIT_TIME
+			if v then v.Name = "UnCollected_Bond" FailedCollectedBonds = FailedCollectedBonds + 1 end
         end
     end
     for i = 1,5 do
@@ -888,8 +890,14 @@ spawn(function()
 		        end
 		
 		        local distance = (HumanoidRootPart.Position - objPosition).Magnitude
-		        if distance <= 80 then
+		        if distance <= 1000 then
+				local MAX_WAIT_TIME = 1
+				local startTime = tick()
+				repeat
 					game:GetService("ReplicatedStorage").Shared.Network.RemotePromise.Remotes.C_ActivateObject:FireServer(v)
+					task.wait()
+				until tick() - startTime > MAX_WAIT_TIME or not v.Parent or not v
+				if v then v.Name = "Uncollected_bond" FailedCollectedBonds = FailedCollectedBonds + 1 end
 				end
 			end
 		end
@@ -961,11 +969,11 @@ if getgenv().BondFarmSetting.CheckMissedBonds and getgenv().BondFarmSetting.Chec
     local bondmiss = Instance.new("Message")
     bondmiss.Parent = game.CoreGui
     if tonumber(#allbonds) - collectedbonds > 0 then 
-	    bondmiss.Text = "Bonds Missed: ".. tonumber(#allbonds) - collectedbonds .. " bond(s), \n Total Bonds Detected: ".. tonumber(#allbonds).. " bond(s)."
+	    bondmiss.Text = "Bonds Missed: ".. tonumber(#allbonds) - collectedbonds .. " bond(s), \n Total Bonds Detected: ".. tonumber(#allbonds).. " bond(s), \n Failed collected bonds: ".. FailedCollectedBonds .. "."
     elseif tonumber(#allbonds) - collectedbonds == 0 then 
-	    bondmiss.Text = "No bond were missed, \n Total Bonds Detected: ".. tonumber(#allbonds).. " bond(s)."
+	    bondmiss.Text = "No bond were missed, \n Total Bonds Detected: ".. tonumber(#allbonds).. " bond(s), \n Failed collected bonds: ".. FailedCollectedBonds .. "."
     elseif tonumber(#allbonds) - collectedbonds < 0 then 
-        bondmiss.Text = "Unknown number of bond(s) were missed, \n Total Bonds Detected: ".. collectedbonds.. " bond(s)"
+        bondmiss.Text = "Unknown number of bond(s) were missed, \n Total Bonds Detected: ".. collectedbonds.. " bond(s), \n Failed collected bonds: ".. FailedCollectedBonds .. "."
     end
     wait(10)
     bondmiss:Destroy()

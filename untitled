@@ -799,7 +799,7 @@ local function collectBonds()
 			local startTime = tick()
             repeat
 	            local targetCFrame = closestBond.WorldPivot
-	            Character.HumanoidRootPart:PivotTo(targetCFrame)
+	            Character.HumanoidRootPart:PivotTo(targetCFrame * CFrame.new(0,-8,0))
 	            game:GetService("ReplicatedStorage").Shared.Network.RemotePromise.Remotes.C_ActivateObject:FireServer(closestBond)
 	            task.wait()
 	        until not closestBond or not closestBond.Parent or tick() - startTime > MAX_WAIT_TIME

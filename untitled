@@ -1,15 +1,6 @@
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
-getgenv().BondFarmSetting = {
-    tweenDuration = 18, -- The lower it goes, the faster you teleport, Best is 15-18.
-    AutoExecute = true,
-    CheckMissedBonds = true,
-    WebhookUrl = "URL_HERE",
-    autoSHOPDelay = 70 -- How long it will wait to make you server hop, avoid stuck.
-}
-EnabledScript = true
-SaveNewSettings = true
 
 if EnabledScript ~= true then return end
 if getgenv().AlreadyExecutedBondFarm and getgenv().AlreadyExecutedBondFarm == true then print("Script already ran, stopped script") return end
@@ -803,7 +794,7 @@ local function collectBonds()
 	            game:GetService("ReplicatedStorage").Shared.Network.RemotePromise.Remotes.C_ActivateObject:FireServer(closestBond)
 	            task.wait()
 	        until not closestBond or not closestBond.Parent or tick() - startTime > MAX_WAIT_TIME
-			if v.Parent then v.Name = "UnCollected_Bond" FailedCollectedBonds = FailedCollectedBonds + 1 end
+			if closestBond.Parent then closestBond.Name = "UnCollected_Bond" FailedCollectedBonds = FailedCollectedBonds + 1 end
         end
     end
     for i = 1,5 do

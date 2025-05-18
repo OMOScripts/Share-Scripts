@@ -1,7 +1,15 @@
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
-
+getgenv().BondFarmSetting = {
+    tweenDuration = 18, -- The lower it goes, the faster you teleport, Best is 15-18.
+    AutoExecute = true,
+    CheckMissedBonds = true,
+    WebhookUrl = "URL_HERE",
+    autoSHOPDelay = 70 -- How long it will wait to make you server hop, avoid stuck.
+}
+EnabledScript = true
+SaveNewSettings = true
 
 if EnabledScript ~= true then return end
 if getgenv().AlreadyExecutedBondFarm and getgenv().AlreadyExecutedBondFarm == true then print("Script already ran, stopped script") return end
@@ -885,15 +893,7 @@ spawn(function()
 	while Humanoid.Health ~= 0 do
 		for i,v in pairs(workspace.RuntimeItems: GetChildren()) do
 			if v.Name == "Bond" then 
-				local objPosition
-		        if v:IsA("Model") then
-		            objPosition = v.WorldPivot.Position
-		        end
-		
-		        local distance = (HumanoidRootPart.Position - objPosition).Magnitude
-		        if distance <= 100 then
-					game:GetService("ReplicatedStorage").Shared.Network.RemotePromise.Remotes.C_ActivateObject:FireServer(v)
-				end
+				game:GetService("ReplicatedStorage").Shared.Network.RemotePromise.Remotes.C_ActivateObject:FireServer(v)
 			end
 		end
 		task.wait()
